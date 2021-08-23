@@ -14,7 +14,6 @@ galaxy_info:
     - trusty
   - name: CentOS
     versions:
-    - 6.5
     - 7
   categories:
     - system
