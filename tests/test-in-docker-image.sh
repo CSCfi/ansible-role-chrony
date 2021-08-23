@@ -12,12 +12,8 @@ ANSIBLE_VERSION=${3:-}
 ANSIBLE_VAR=""
 ANSIBLE_INVENTORY="tests/inventory"
 ANSIBLE_PLAYBOOk="tests/test.yml"
-ANSIBLE_PLAYBOOK_IDEMPOTENCY="tests/test_idempotency.yml"
-ANSIBLE_PLAYBOOK_FACTLESS="tests/test_factless.yml"
-ANSIBLE_PLAYBOOK_ID_FACTLESS="tests/test_id_factless.yml"
-ANSIBLE_LOG_LEVEL=""
-#ANSIBLE_LOG_LEVEL="-v"
-ANSIBLE_CHECK_LOG_LEVEL=""
+#ANSIBLE_LOG_LEVEL=""
+ANSIBLE_LOG_LEVEL="-v"
 APACHE_CTL="apache2ctl"
 
 # if there wasn't sudo then ansible couldn't use it
@@ -39,7 +35,7 @@ fi
 
 
 cd $RDIR/..
-printf "[defaults]\nroles_path = ../:roles" > ansible.cfg
+printf "[defaults]\nroles_path = ../:roles\ncallback_whitelist = profile_tasks" > ansible.cfg
 printf "" > ssh.config
 
 function show_version() {
@@ -108,45 +104,23 @@ function test_playbook_syntax(){
 }
 
 function test_playbook_check(){
-    echo "TEST: ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_CHECK_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} --check"
+    echo "TEST: ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} --check"
 
-    ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_CHECK_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} --check ||(echo "playbook check failed" && exit 2 )
+    ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} --check ||(echo "playbook check failed" && exit 2 )
 
 }
 
 function test_playbook(){
-    echo "TEST: 1 ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS}"
-    ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} ||(echo "first ansible run failed" && exit 3 )
+    echo "TEST: ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS}"
+    ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} ||(echo "first ansible run failed" && exit 2 )
 
-    echo "TEST: 2 ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOK_IDEMPOTENCY} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS}"
-    ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOK_IDEMPOTENCY} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} ||(echo "second ansible run failed" && exit 4 )
-
-    echo "TEST: 3 idempotence test! Same as previous (only second play in test.yml) but now grep for changed=0.*failed=0"
-    ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOK_IDEMPOTENCY} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} | grep -q 'changed=0.*failed=0' && (echo 'Idempotence test: pass' ) || (echo 'Idempotence test: fail' && exit 1)
-
-    echo "TEST: 4 factless! ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOK_FACTLESS} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS}"
-    # instead of having multiple very similar playbooks we copy them and modify them with sed
-    cp -v ${ANSIBLE_PLAYBOOk} ${ANSIBLE_PLAYBOOK_FACTLESS}
-    sed -i '/hosts: localhost/a \ \ \ gather_facts: False' ${ANSIBLE_PLAYBOOK_FACTLESS}
-    cp -v ${ANSIBLE_PLAYBOOK_IDEMPOTENCY} ${ANSIBLE_PLAYBOOK_ID_FACTLESS}
-    sed -i '/hosts: localhost/a \ \ \ gather_facts: False' ${ANSIBLE_PLAYBOOK_ID_FACTLESS}
-    sed -i 's/test_idempotency.yml/test_id_factless.yml/' ${ANSIBLE_PLAYBOOK_FACTLESS}
-    ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOK_FACTLESS} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS}
+#    echo "TEST: idempotence test! Same as previous but now grep for changed=0.*failed=0"
+#    ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOk} ${ANSIBLE_LOG_LEVEL} --connection=local ${SUDO_OPTION} ${ANSIBLE_EXTRA_VARS} || grep -q 'changed=0.*failed=0' && (echo 'Idempotence test: pass' ) || (echo 'Idempotence test: fail' && exit 1)
 }
 function extra_tests(){
 
-    echo "TEST: getent passwd | tail -20"
-    getent passwd|tail -20
-    echo "TEST: getent shadow | tail -20"
-    getent shadow|tail -20
-    echo "TEST: getent group | tail -20"
-    getent group|tail -20
-    echo "TEST: cat root users authorized_keys"
-    cat /root/.ssh/authorized_keys
-    echo "TEST: tree -a /home"
-    tree -a /home
-    echo "TEST: ls non-default homedir location"
-    ls -l /var/lib/
+	echo "TEST: cat chrony.conf"
+	cat /etc/chrony.conf
 }
 
 
