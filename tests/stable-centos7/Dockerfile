@@ -9,7 +9,8 @@ RUN yum clean all && \
     sed -i -e 's/^Defaults.*requiretty/Defaults    !requiretty/' -e 's/^%wheel.*ALL$/%wheel    ALL=(ALL)    NOPASSWD: ALL/' /etc/sudoers && \
     yum -y install python-pip && \
     pip install --upgrade "pip < 19.2" && \
-    pip install pyrax pysphere boto passlib dnspython pbr && \
+    pip install pbr && \
+    pip install pyrax pysphere boto passlib dnspython && \
     yum -y remove $(rpm -qa "*-devel") && \
     yum -y groupremove "Development tools" && \
     yum -y autoremove && \
