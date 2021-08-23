@@ -5,8 +5,6 @@ ansible-role-chrony
 
 Ansible role to install chrony ntp daemon in client mode.
 
-Depends on ansible 2.0 (uses the package module)
-
 This role has some changes and different defaults than the one it is forked from. The reason behind this is to make the role work for https://github.com/fgci-org/fgci-ansible
 
 Role Variables
