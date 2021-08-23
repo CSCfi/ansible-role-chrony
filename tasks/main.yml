@@ -55,12 +55,10 @@
     name: "{{ chrony_service_info.name }}"
     enabled: yes
     state: started
-    pattern: chronyd
   when: ansible_connection != 'chroot'
 
 - name: ensure chrony service is restarted if necessary
   service:
     name: "{{ chrony_service_info.name }}"
     state: restarted
-    pattern: chronyd
   when: (chrony_conf is changed) and (ansible_connection != 'chroot')
