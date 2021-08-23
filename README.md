@@ -3,7 +3,7 @@ ansible-role-chrony
 
 [![Build Status](https://travis-ci.org/CSCfi/ansible-role-chrony.svg?branch=master)](https://travis-ci.org/CSCfi/ansible-role-chrony)
 
-Ansible role to install chrony ntp daemon in client mode.
+Role to install chrony ntp daemon in client mode.
 
 Depends on ansible 2.0 (uses the package module)
 
